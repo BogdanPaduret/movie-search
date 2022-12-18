@@ -1,33 +1,27 @@
-// https://www.themoviedb.org/settings/api/new?type=developer
-// https://www.omdbapi.com/
+// functii asincrone cu error-handling
 
-let btnSearch = document.querySelector("section.search.container button");
-let inputSearch = document.querySelector("section.search.container input");
-let cardsContainer = document.querySelector("section.search-results.container");
-
+// TMDB API
 let tmdbApiKey = "3ff05c73150175415cdee107846b7677";
-let tmdbSearchPath =
-    "https://api.themoviedb.org/3/search/movie?api_key=" + tmdbApiKey;
-let tmdbImageBasePath = "https://image.tmdb.org/t/p/";
+let tmdbRootPath = "https://api.themoviedb.org/3";
+let tmdbApiKeyPath = "?api_key=" + tmdbApiKey;
 
-btnSearch.addEventListener("click", () => {
-    getSearchResults();
-});
+let tmdbMovieSearchPath = tmdbRootPath + "/search/movie" + tmdbApiKeyPath;
+let tmdbApiGenresPath =
+    tmdbRootPath + "/genre/movie/list" + tmdbApiKeyPath + "&language=en-US";
+let tmdbApiDetailsPath = tmdbRootPath + "/movie";
+let tmdbImageBasePath = "https://image.tmdb.org/t/p";
 
-inputSearch.addEventListener("keydown", (e) => {
-    if (e.key == "Enter") {
-        getSearchResults();
-        inputSearch.value = "";
-    }
-});
+// OMDB API
+let omdbApiKey = "dbf0d08b";
+let omdbBasePath = "http://www.omdbapi.com/?apikey=" + omdbApiKey + "&";
+let omdbImgPath = "http://img.omdbapi.com/?apikey=" + omdbApiKey + "&";
 
-async function getSearchResults() {
+// search results
+async function fillSearchResults() {
     let searchQuery = inputSearch.value;
     searchQuery = searchQuery.replace(" ", "+");
 
-    searchQuery = tmdbSearchPath + "&query=" + searchQuery;
-
-    console.log(searchQuery);
+    searchQuery = tmdbMovieSearchPath + "&query=" + searchQuery;
 
     // try catch cu async await in loc de fetch.then.then... .catch
     try {
@@ -38,19 +32,16 @@ async function getSearchResults() {
     } catch (e) {
         console.error(e);
     }
+}
 
-    // fetch(searchQuery)
-    //     .then((data) => {
-    //         return data.json();
-    //     })
-    //     .then((data) => {
-    //         return data.results;
-    //     })
-    //     .then((data) => {
-    //         console.log(data);
-    //         createAllCards(data);
-    //     })
-    //     .catch((e) => {
-    //         console.log(e);
-    //     });
+// filters
+async function fillFilters() {
+    try {
+        let response = await fetch(tmdbApiGenresPath);
+        response = await response.json();
+        response = await response.genres;
+        fillGenres(response);
+    } catch (e) {
+        console.error(e);
+    }
 }

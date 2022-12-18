@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <title>Netflix Copy</title>
 </head>
+
 <body>
     <header>
         <section class="search container">
@@ -17,11 +19,23 @@
     </header>
 
     <main>
+        <!-- <section class="maximized-view"></section> -->
         <section class="search-results container">
-            <!-- placeholrder cards for styling -->
+            <!-- placeholder cards for styling -->
             <article class="movie-id card">
                 <h2 class="movie-id title">Movie title</h2>
             </article>
+        </section>
+        <section class="all-filters container">
+            <section class="filter genre tab">
+                <h2>Filters</h2>
+                <section class="filter genre container">
+                    <h3>Genres</h3>
+                    <div></div>
+                    <button class="clear-genre-filter">Clear genres filter</button>
+                </section>
+            </section>
+            <button class="apply-filters">Apply filters</button>
         </section>
     </main>
 
@@ -29,7 +43,9 @@
 
     <script src="functions.js"></script>
     <script src="fetch.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
 
 <!-- 14.12 / 15.12 / 16.12 @ 22:00 -->
