@@ -4,6 +4,7 @@
 let btnSearch = document.querySelector("section.search.container button");
 let inputSearch = document.querySelector("section.search.container input");
 let cardsContainer = document.querySelector("section.search-results.container");
+let maxiCardSection = document.querySelector("section.maximized-view");
 
 let btnClearGenres = document.querySelector("button.clear-genre-filter");
 let btnApplyFilters = document.querySelector("button.apply-filters");
@@ -13,6 +14,7 @@ let genresFilterContainer = filtersContainer.querySelector(
     "section.filter.genre.tab section.filter.genre.container div"
 );
 
+maxiCardSection.style.visibility = "hidden";
 fillFilters();
 
 btnSearch.addEventListener("click", () => {
@@ -40,6 +42,6 @@ cardsContainer.addEventListener("click", (e) => {
     let card = e.target.closest(".card");
 
     if (card != null) {
-        mainColor(card);
+        maximizeCard(card);
     }
 });
