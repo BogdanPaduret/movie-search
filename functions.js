@@ -28,6 +28,8 @@ function buildCard(cardElements) {
 }
 async function generateCardElements(element) {
     // main poster
+    // console.log(element);
+
     let posterPath = element.poster_path;
     if (posterPath == null) {
         posterPath = "/pictures/no-image.png";
@@ -73,6 +75,9 @@ async function generateCardElements(element) {
 }
 
 // filters
+async function fillFilters() {
+    fillGenres(await getGenres());
+}
 function fillGenres(arr) {
     arr.forEach((element) => {
         // console.log(element);
@@ -169,18 +174,16 @@ async function getMovieDetails(movieId) {
     }
 }
 
-async function getMoviePictures(movieId) {
+async function getMovieImages(movieId) {
     let tmdbSearchQuery =
         tmdbApiDetailsPath + "/" + movieId + "/images" + tmdbApiKeyPath;
 
     try {
         let response = await fetch(tmdbSearchQuery);
         response = await response.json();
-        response = await response.backdrops;
-        response.forEach((element) => {
-            let img = tmdbImageBasePath + "/original" + "/" + element.file_path;
-            console.log(img);
-        });
+        // response = await response.backdrops;
+
+        return response;
     } catch (e) {
         console.error(e);
     }
@@ -199,15 +202,215 @@ async function maximizeCard(card) {
     let mainColor = cardColors[0];
 
     setMaxiColor(mainColor, 0.5, 10);
-
-    buildMaxiCard(movieId);
+    buildMaxiCard(movieId, mainColor);
 }
 function setMaxiColor(rgbColor, transparency, blurSize) {
     maxiCardSection.style.visibility = "visible";
     maxiCardSection.style.background = rgbaToString(rgbColor, transparency);
     maxiCardSection.style.backdropFilter = "blur(" + blurSize + "px)";
 }
-function buildMaxiCard(movieId) {}
+async function buildMaxiCard(movieId, colorCodeArray) {
+    let tmdbDetails = await getMovieDetails(movieId);
+
+    // generate elements
+    let elements = await generateMaximizedCardElements(tmdbDetails);
+    let containers = generateContainers(3, ["maxi-element"]);
+    let posterZones = generateContainers(3, ["maxi-element", "click-area"]);
+    let infoContainers = generateContainers(3, [
+        "maxi-element",
+        "info-element",
+    ]);
+
+    // edit elements
+    let containerLogo = containers[0];
+    let containerPosters = containers[1];
+    let containerInfo = containers[2];
+
+    let divLeft = posterZones[0];
+    let divRight = posterZones[1];
+    let divImg = posterZones[2];
+
+    let titleContainer = infoContainers[0];
+    let miscContainer = infoContainers[1];
+    let overviewContainer = infoContainers[2];
+
+    containerLogo.classList.add("logo");
+    containerPosters.classList.add("posters");
+    containerInfo.classList.add("info");
+
+    divLeft.classList.add("left");
+    divRight.classList.add("right");
+    divImg.classList.add("pic");
+
+    titleContainer.classList.add("title");
+    miscContainer.classList.add("misc");
+    overviewContainer.classList.add("overview");
+
+    elements.backdrops[0].style.display = "block";
+
+    // building card itself
+    let card = elements.article;
+
+    card.appendChild(containerLogo);
+    card.appendChild(containerPosters);
+    card.appendChild(containerInfo);
+
+    // build posters container
+    containerPosters.appendChild(divLeft);
+    containerPosters.appendChild(divRight);
+    containerPosters.appendChild(divImg);
+
+    divImg.appendChild(elements.poster);
+
+    // elements.backdrops.forEach((img) => {
+    //     divImg.appendChild(img);
+    // });
+
+    // build info container
+    containerInfo.appendChild(titleContainer);
+    containerInfo.appendChild(miscContainer);
+    containerInfo.appendChild(overviewContainer);
+
+    titleContainer.appendChild(elements.title);
+
+    miscContainer.appendChild(elements.originalTitle);
+    miscContainer.appendChild(elements.releaseDate);
+
+    overviewContainer.appendChild(elements.overview);
+
+    // build logo container
+    if (elements.mainLogo.hasAttribute("src")) {
+        console.log("BINGO!");
+        containerLogo.appendChild(elements.mainLogo);
+    } else {
+        console.log("NOT BINGO...");
+        console.log(elements.title);
+        containerLogo.appendChild(elements.title);
+        elements.title.style.color = rgbaToString(colorCodeArray, 1);
+        elements.title.style.webkitTextStroke = "1px black";
+    }
+
+    console.log(card);
+
+    maxiCardSection.appendChild(card);
+}
+async function generateMaximizedCardElements(details) {
+    console.log(details);
+
+    // article
+    let article = document.createElement("article");
+    article.classList.add("maxi", details.id);
+
+    // background
+    let poster = document.createElement("img");
+    poster.classList.add("maxi-element", "poster");
+    poster.src = tmdbImageBasePath + "/original" + details.poster_path;
+
+    // images
+    let images = await getMovieImages(details.id);
+
+    console.log(images);
+
+    let backdrops = await images.backdrops;
+    let mainLogo = await images.logos;
+    if (mainLogo.length > 0) {
+        mainLogo.forEach((element) => {
+            if (element.iso_639_1 == "en") {
+                mainLogo = element;
+            }
+        });
+        if (mainLogo.length >= 1) {
+            mainLogo = mainLogo[0];
+        }
+    } else {
+        mainLogo = null;
+    }
+
+    // let posters = await images.posters;
+
+    let backdropsArray = [];
+
+    backdrops.forEach((element) => {
+        let path = element.file_path;
+        let el = document.createElement("img");
+        el.classList.add(
+            "maxi-element",
+            "backdrop",
+            path.substring(1, path.lastIndexOf(".jpg"))
+        );
+        el.src = tmdbImageBasePath + "/original" + path;
+
+        el.style.display = "none";
+
+        backdropsArray.push(el);
+    });
+
+    if (backdropsArray.length == 0) {
+        let path = details.poster_path;
+        let el = document.createElement("img");
+        el.classList.add(
+            "maxi-element",
+            "backdrop",
+            path.substring(1, path.lastIndexOf(".jpg"))
+        );
+        el.src = tmdbImageBasePath + "/original" + details.poster_path;
+        el.style.display = "none";
+        backdropsArray.push(el);
+    }
+
+    let logoElement = document.createElement("img");
+    try {
+        logoElement.src = tmdbImageBasePath + "/original" + mainLogo.file_path;
+    } catch (e) {
+        console.log(e);
+    }
+
+    // title
+    let title = document.createElement("h2");
+    title.classList.add("maxi-element", "title");
+    title.textContent = details.title;
+
+    // original title
+    let originalTitle = document.createElement("p");
+    originalTitle.classList.add("maxi-element", "original-title");
+    originalTitle.textContent = "Original title: " + details.original_title;
+
+    // release date
+    let releaseDate = document.createElement("p");
+    releaseDate.textContent = "Release date: " + details.release_date;
+
+    // overview
+    let overview = document.createElement("p");
+    overview.classList.add("maxi-element", "overview");
+    overview.textContent = details.overview;
+
+    return {
+        article,
+        mainLogo: logoElement,
+        poster,
+        backdrops: backdropsArray, // array of the backdrops, all hidden
+        title,
+        releaseDate,
+        originalTitle,
+        overview,
+    };
+}
+function generateContainers(amount, classesArray) {
+    let containers = [];
+    for (let i = 0; i < amount; i++) {
+        let c = document.createElement("div");
+        classesArray.forEach((classEl) => {
+            c.classList.add(classEl);
+        });
+        containers.push(c);
+    }
+    return containers;
+}
+
+function closeMaximizedWindow() {
+    maxiCardSection.textContent = "";
+    maxiCardSection.style.visibility = "hidden";
+}
 
 // get color palletes of poster/card
 let getCardColorPaletteArray = async (movieId, depth) => {
@@ -233,7 +436,7 @@ let getCardColorPaletteArray = async (movieId, depth) => {
 async function getColorPaletteArray(imageURL, depth) {
     // depth de 4 returneaza o singura culoare, de 0 returneaza 16 culori
     // nu itnreba de ce... nu am inteles perfect
-    let imageElement = await getImage(imageURL);
+    let imageElement = await getImageElementFromURL(imageURL);
 
     let canvas = document.createElement("canvas");
     canvas.width = imageElement.width;
@@ -253,7 +456,7 @@ async function getColorPaletteArray(imageURL, depth) {
 
     return palette;
 }
-function getImage(imageURL) {
+function getImageElementFromURL(imageURL) {
     return new Promise((resolve, reject) => {
         let img = new Image();
         img.src = imageURL;
