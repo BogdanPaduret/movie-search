@@ -35,12 +35,13 @@ async function fillSearchResults() {
 }
 
 // filters
-async function fillFilters() {
+async function getGenres() {
     try {
         let response = await fetch(tmdbApiGenresPath);
         response = await response.json();
         response = await response.genres;
-        fillGenres(response);
+
+        return response;
     } catch (e) {
         console.error(e);
     }
