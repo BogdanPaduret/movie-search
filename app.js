@@ -15,6 +15,8 @@ let genresFilterContainer = filtersContainer.querySelector(
     "section.filter.genre.tab section.filter.genre.container div"
 );
 
+spinner(false);
+
 // ================================================
 // nu merge
 
@@ -61,4 +63,5 @@ cardsContainer.addEventListener("click", (e) => {
 
 maxiCardSection.addEventListener("click", (e) => {
     closeMaximizedWindow();
+    inputSearch.focus();
 });

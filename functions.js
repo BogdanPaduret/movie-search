@@ -196,6 +196,8 @@ function removeCard(card) {
 
 // maximized card
 async function maximizeCard(card) {
+    spinner(true);
+
     let movieId = card.classList[1];
 
     let cardColors = await getCardColorPaletteArray(movieId, 0);
@@ -203,6 +205,7 @@ async function maximizeCard(card) {
 
     setMaxiColor(mainColor, 0.5, 10);
     buildMaxiCard(movieId, mainColor);
+    spinner(false);
 }
 function setMaxiColor(rgbColor, transparency, blurSize) {
     maxiCardSection.style.visibility = "visible";
@@ -428,6 +431,10 @@ let getCardColorPaletteArray = async (movieId, depth) => {
     omdbDetails = await omdbDetails.json();
 
     let omdbPoster = await omdbDetails.Poster;
+
+    if (omdbPoster == null) {
+        omdbPoster = tmdbImageBasePath + "/w500" + movieDetails.poster_path;
+    }
 
     let colorPaletteArray = await getColorPaletteArray(omdbPoster, depth);
 
@@ -672,4 +679,14 @@ function createColorDiv(color) {
     div.style.width = "20px";
 
     return div;
+}
+
+function spinner(loading) {
+    let spinner = document.querySelector("section.container-spinner");
+
+    if (loading) {
+        spinner.style.display = "flex";
+    } else {
+        spinner.style.display = "none";
+    }
 }

@@ -18,6 +18,7 @@ let omdbImgPath = "http://img.omdbapi.com/?apikey=" + omdbApiKey + "&";
 
 // search results
 async function fillSearchResults() {
+    spinner(true);
     let searchQuery = inputSearch.value;
     searchQuery = searchQuery.replace(" ", "+");
 
@@ -32,6 +33,8 @@ async function fillSearchResults() {
     } catch (e) {
         console.error(e);
     }
+
+    spinner(false);
 }
 
 // filters
